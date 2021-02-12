@@ -2,7 +2,7 @@ from behave import use_fixture
 from base.fixtures import browser
 from base.ssh_interaction import upload_server, loader
 import configparser
-from base.service_functions import logout, login, modify_userdata, pgsql_select
+from base.service_functions import logout, login, modify_userdata, pgsql_select, refine_holidays
 
 config = configparser.ConfigParser()
 config.read("config/config.ini")
@@ -18,6 +18,7 @@ def before_all(context):
     # upload_server(**config['server'])
     # loader(**config['server'])
     """"""
+
 
 def before_feature(context, feature):
     if feature.tags:

@@ -81,10 +81,29 @@ class CustomDriver():
         elements = self.webdriver.find_elements(st, selector)
         return elements
 
-    def get_atribute(self, selector,attribute='innerHTML', selector_type='xpath'):
+    def get_atribute(self, selector, selector_type='xpath', attribute='innerHTML'):
         st = self.__get_selector_type(selector_type)
-        element = self.webdriver.find_element(st, selector)
+        wait = WebDriverWait(self.webdriver,
+                             timeout=10,
+                             poll_frequency=1,
+                             ignored_exceptions=[
+                                 NoSuchElementException,
+                                 ElementNotVisibleException,
+                                 ElementNotSelectableException
+                             ])
+
+        element = wait.until(EC.visibility_of_element_located((st, selector)))
         return element.get_attribute(attribute)
+
+    def check_el_text(self,text, selector, selector_type='xpath'):
+        st = self.__get_selector_type(selector_type)
+        wait = WebDriverWait(self.webdriver,
+                             timeout=10,
+                             poll_frequency=1,
+                             )
+
+        element = wait.until(EC.text_to_be_present_in_element((st, selector), text))
+        return element
 
     def click_by_coordinates(self, x,y):
         if 'get' in dir(self.webdriver):
@@ -112,7 +131,8 @@ class CustomDriver():
             raise Exception('object is element of page')
     def get_url(self):
         if 'get' in dir(self.webdriver):
-            return self.webdriver.current_url()
+            time.sleep(0.3)
+            return self.webdriver.current_url
         else:
             raise Exception('object is element of page')
 

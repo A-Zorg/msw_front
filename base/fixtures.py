@@ -73,7 +73,8 @@ def browser(context, name='chrome'):
     """requests session"""
     context.session = create_user_session(**config['super_user'])
     """define host"""
-    context.host = config['host']['host']
+    context.host = config['host']['host_api']
+    context.host_front = config['host']['host_front']
     yield
     context.driver.quit()
 

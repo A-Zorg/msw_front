@@ -4,6 +4,8 @@ import cv2
 from mysql.connector import connection
 import psycopg2
 import re
+import datetime
+
 
 def login(driver, username, password, totp):
     driver.use_url('https://mytest.sg.com.ua:9999/login')
@@ -69,8 +71,6 @@ def check_image(img1, img2):
     hash1 = CalcImageHash(img1)
     hash2 = CalcImageHash(img2)
     result = CompareHash(hash1,hash2)
-    with open('C:\\Users\\wsu\\Desktop\\xxx.txt', 'a') as file:
-        file.write(str(result)+'\n')
     if result > 20:
         return False
     else:
@@ -140,7 +140,52 @@ def modify_userdata(session, host, id, hr_id, prev_m_n, acc_amount):
     response = session.post(url, data=data, headers={"Referer": url})
     return response.ok
 
+"""--------------------------HOLIDAYS-------------------------------------"""
 
+
+def get_holidays(config):
+    countries = ['US', 'GB']
+    holidays = {
+        'New Year\'s Day': '',
+        'Martin Luther King, Jr. Day': '',
+        'Washington\'s Birthday': '',
+        'Memorial Day': '',
+        'Independence Day': '',
+        'Labour Day': '',
+        'Thanksgiving Day': '',
+        'Christmas Day': '',
+        'Good Friday': '',
+                }
+    for country in countries:
+        url = f"https://public-holiday.p.rapidapi.com/2021/{country}"
+
+        headers = {
+            'x-rapidapi-key': config['x-rapidapi-key'],
+            'x-rapidapi-host': config['x-rapidapi-host']
+        }
+
+        response = requests.get(
+            url=url,
+            headers= headers
+        )
+        for i in response.json():
+            if holidays.get(i['name']) == '':
+                holidays[i['name']] = datetime.date.fromisoformat(i['date'])
+    holidays['Labor Day'] = holidays['Labour Day']
+    del holidays['Labour Day']
+
+    return holidays
+
+def refine_holidays(config):
+    holidays = get_holidays(config)
+    now = datetime.date.today()
+    ref_hol = []
+    for key, value in holidays.items():
+        if value >= now:
+            ref_hol.append([key, value])
+    ref_hol = sorted(ref_hol, key=lambda lis: lis[1])
+
+    return ref_hol[:5]
 
 
 
