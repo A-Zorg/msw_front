@@ -135,7 +135,7 @@ for username in user_dict.keys():
     UserBill.objects.filter(user=user).delete()
     HistoryUserBill.objects.filter(user=user).delete()
     for bill_type in UserBillTypes.objects.all():
-        UserBill.objects.create(user=user,bill=bill_type, amount=0).save()
+        UserBill.objects.create(user=user, bill=bill_type, amount=0).save()
 
 
     userdata_object = UserData.objects.get(user=user)

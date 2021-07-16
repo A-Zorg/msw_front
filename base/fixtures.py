@@ -1,6 +1,7 @@
 from selenium import webdriver
 from behave import fixture
 import os
+import datetime
 from selenium.webdriver.chrome.options import Options
 from msedge.selenium_tools import Edge, EdgeOptions
 from base.custom_driver import CustomDriver
@@ -9,6 +10,11 @@ from base.service_functions import create_user_session
 
 config = configparser.ConfigParser()
 config.read("config/config.ini")
+
+
+def txt_writer(message):
+    with open('./xxx.txt', 'a') as file:
+        file.write(f'date:{datetime.datetime.now()}: {message} \n')
 
 def firefox():
 
@@ -24,8 +30,9 @@ def firefox():
     path = os.getcwd() + '/drivers/geckodriver.exe'
     os.environ['webdriver.gecko.driver'] = path
 
-    driver = webdriver.Firefox( executable_path=path, firefox_profile=profile)
+    driver = webdriver.Firefox(executable_path=path, firefox_profile=profile)
     return driver
+
 
 def chrome():
 
@@ -42,8 +49,9 @@ def chrome():
     path = os.getcwd() + '/drivers/chromedriver.exe'
     os.environ['webdriver.chrome.driver'] = path
 
-    driver = webdriver.Chrome( executable_path=path, options=options)
+    driver = webdriver.Chrome(executable_path=path, options=options)
     return driver
+
 
 def edge():
 
@@ -61,7 +69,7 @@ def edge():
     path = os.getcwd() + '/drivers/msedgedriver.exe'
     os.environ['webdriver.msedge.driver'] = path
 
-    driver = Edge( executable_path=path, options=options)
+    driver = Edge(executable_path=path, options=options)
     return driver
 
 
@@ -71,14 +79,17 @@ def browser(context, name='chrome'):
     driver = eval(name)()
     context.driver = CustomDriver(driver)
     """requests session"""
-    context.session = create_user_session(**config['super_user'])
+    context.admin_session = create_user_session(**config['super_user'])
+    context.manger_session = create_user_session(**config['manager_1'])
     """define host"""
     context.host = config['host']['host_api']
     context.host_front = config['host']['host_front']
-    yield
-    context.driver.quit()
+    context.txt_writer = txt_writer
 
-    context.session.close()
+    yield
+
+    context.driver.quit()
+    context.admin_session.close()
 
 
 

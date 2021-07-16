@@ -5,17 +5,25 @@ from mysql.connector import connection
 import psycopg2
 import re
 import datetime
-
+import time
 
 def login(driver, username, password, totp):
     driver.use_url('https://mytest.sg.com.ua:9999/login')
-    driver.input_text(username, '//*[@id="input-12"]')
-    driver.input_text(password, '//*[@id="input-16"]')
-    driver.click_with_wait('/html/body/div/div/div/main/div/div/div/div/div/div/form/div[3]/button[1]/span')
+    driver.input_text(username, '//*[@id="input-11"]')
+    driver.input_text(password, '//*[@id="input-15"]')
+    driver.click_with_wait(selector='button[type="submit"]', selector_type='css')
+    totp_object = pyotp.TOTP(totp).now()
+    driver.input_text(totp_object, '//*[@id="input-29"]')
+    driver.click_with_wait(selector='button[type="submit"]', selector_type='css')
 
-    totp_object = pyotp.TOTP(totp)
-    driver.input_text(totp_object.now(), '//*[@id="input-30"]')
-    driver.click_with_wait('/html/body/div/div/div/main/div/div/div/div/div/div/form/div[2]/button/span')
+    if 'twofa' in driver.get_url():
+        while True:
+            totp_object_next = pyotp.TOTP(totp).now()
+            if totp_object_next != totp_object:
+                driver.input_text(totp_object_next, '//*[@id="input-29"]')
+                driver.click_with_wait(selector='button[type="submit"]', selector_type='css')
+
+                break
 
 
 def logout(driver):
@@ -39,7 +47,7 @@ def create_user_session(username, password, totp):
 """--------------------------------CHECK PICTURES-------------------------------------"""
 def CalcImageHash(FileName):
     image = cv2.imread(FileName)
-    resized = cv2.resize(image, (16,16), interpolation=cv2.INTER_AREA)
+    resized = cv2.resize(image, (16, 16), interpolation=cv2.INTER_AREA)
 
     gray_image = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     avg = gray_image.mean()
@@ -53,8 +61,6 @@ def CalcImageHash(FileName):
                 _hash = _hash + "1"
             else:
                 _hash = _hash + "0"
-    with open('C:\\Users\\wsu\\Desktop\\xxx.txt', 'a') as file:
-        file.write(str(_hash)+'\n')
     return _hash
 
 def CompareHash(hash1, hash2):
@@ -70,7 +76,7 @@ def CompareHash(hash1, hash2):
 def check_image(img1, img2):
     hash1 = CalcImageHash(img1)
     hash2 = CalcImageHash(img2)
-    result = CompareHash(hash1,hash2)
+    result = CompareHash(hash1, hash2)
     if result > 20:
         return False
     else:
@@ -78,32 +84,33 @@ def check_image(img1, img2):
 
 """---------------------------------------------SQL--------------------------------------------"""
 def mysql_select(request, user,password, port, host, database):
-  with connection.MySQLConnection(user=user, host=host, port=port,password=password,database=database) as connect:
-    cursor = connect.cursor()
-    if request.startswith('SELECT'):
-      cursor.execute(request)
-      response = cursor.fetchall()
-
-      return response
+    with connection.MySQLConnection(user=user, host=host, port=port,password=password,database=database) as connect:
+        cursor = connect.cursor()
+        if request.startswith('SELECT'):
+            cursor.execute(request)
+            response = cursor.fetchall()
+            time.sleep(1)
+            return response
 
 def pgsql_select(request, user,password, port, host, database):
-  with psycopg2.connect(user=user, host=host, port=port,password=password,database=database,) as connect:
-    cursor = connect.cursor()
-    if request.startswith('SELECT'):
-      cursor.execute(request)
-      response = cursor.fetchall()
-
-      return response
+    with psycopg2.connect(user=user, host=host, port=port,password=password,database=database,) as connect:
+        cursor = connect.cursor()
+        if request.startswith('SELECT'):
+            cursor.execute(request)
+            response = cursor.fetchall()
+            time.sleep(1)
+            return response
 
 def pgsql_del(request, user,password, port, host, database):
-  with psycopg2.connect(user=user, host=host, port=port,password=password,database=database,) as connect:
-    cursor = connect.cursor()
-    if request.startswith('DELETE'):
-      cursor.execute(request)
-      connect.commit()
-      return True
-    else:
-        return False
+    with psycopg2.connect(user=user, host=host, port=port,password=password,database=database,) as connect:
+        cursor = connect.cursor()
+        if request.startswith('DELETE'):
+          cursor.execute(request)
+          connect.commit()
+          time.sleep(1)
+          return True
+        else:
+            return False
 
 """----------------------------------------work with UserData table------------------------------------------"""
 
@@ -188,9 +195,16 @@ def refine_holidays(config):
     return ref_hol[:5]
 
 
+"""----------------------------------------------MINOR functions-------------------------------------------------"""
+def remove_spaces(text):
+    text = text.replace(' ', '')
+    text = text.replace('\n', '')
+    text = text.replace('\t', '')
+    text = text.replace('\r', '')
+    return text
 
 
-
+"""--------------------------------------------------------------------------------------------------"""
 
 
 

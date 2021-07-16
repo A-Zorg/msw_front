@@ -1,12 +1,14 @@
 from behave import use_fixture
 from base.fixtures import browser
-from base.ssh_interaction import upload_server, loader
+from base.ssh_interaction import upload_server, loader, prepare_data
 import configparser
 from base.service_functions import logout, login, modify_userdata, pgsql_select, refine_holidays
 
 config = configparser.ConfigParser()
 config.read("config/config.ini")
 
+selectors = configparser.ConfigParser()
+selectors.read("config/selectors.ini")
 
 def before_all(context):
     """determinating of the browser"""
@@ -15,6 +17,7 @@ def before_all(context):
         browser_type = context.config.userdata['browser']
     use_fixture(browser, context, browser_type)
     """perform configurations"""
+    # prepare_data(context)
     # upload_server(**config['server'])
     # loader(**config['server'])
     """"""
@@ -23,8 +26,7 @@ def before_all(context):
 def before_feature(context, feature):
     if feature.tags:
         tag = feature.tags[0]
-        login(context.driver,**config[tag])
-
+        login(context.driver, **config[tag])
 
 def after_feature(context, feature):
     if feature.tags:
