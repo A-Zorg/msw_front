@@ -54,13 +54,14 @@ class CustomDriver:
         element.click()
         time.sleep(1)
 
-    def input_text(self, text, selector, selector_type='xpath'):
-        st = self._get_selector_type(selector_type)
-        wait = WebDriverWait(self.webdriver,
-                             timeout=30,
-                             poll_frequency=1,
-                             )
-        element = wait.until(EC.visibility_of_element_located((st, selector)))
+    def input_text(self, text, selector=None, selector_type='xpath', element=None):
+        if not element:
+            st = self._get_selector_type(selector_type)
+            wait = WebDriverWait(self.webdriver,
+                                 timeout=30,
+                                 poll_frequency=1,
+                                 )
+            element = wait.until(EC.visibility_of_element_located((st, selector)))
         element.location_once_scrolled_into_view
         element.clear()
         element.send_keys(text)

@@ -85,6 +85,7 @@ def browser(context, name='chrome'):
     context.host = config['host']['host_api']
     context.host_front = config['host']['host_front']
     context.txt_writer = txt_writer
+    context.my_config = config
 
     yield
 

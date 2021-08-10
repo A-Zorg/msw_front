@@ -1,6 +1,7 @@
 
 
 class MainSideBar:
+    logo = {'selector': '.logo', 'selector_type': 'css'}
     burger_button = {'selector': 'button.menu-icon>span>i', 'selector_type': 'css'}
     main_page_button = {'selector': '//div[contains(text(),"Main page")]', 'selector_type': 'xpath'}
     daily_review_button = {'selector': '//div[contains(text(),"Daily review")]', 'selector_type': 'xpath'}
@@ -14,6 +15,9 @@ class MainSideBar:
 
     def __init__(self, webdriver):
         self.webdriver = webdriver
+
+    def click_logo(self):
+        self.webdriver.click_with_wait(**self.logo)
 
     def click_burger(self):
         self.webdriver.click_with_wait(**self.burger_button)
