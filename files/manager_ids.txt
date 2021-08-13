@@ -1,2 +1,0 @@
-{"Lantern":"34504148", "fin_user":"EQS043N"}
-{"Lantern":["OPS"], "fin_user":["OPS"], "Admin_Zatush":["FIN", "FIN ENTRIES", "RISK"]}
